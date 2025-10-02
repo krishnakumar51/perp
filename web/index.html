@@ -1,0 +1,534 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Web Scraper - Enhanced Communication</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Arial', sans-serif; background: #f5f5f5; color: #333; }
+
+        .header { background: #2c3e50; color: white; padding: 15px 20px; }
+        .header h1 { font-size: 24px; }
+        .header .subtitle { opacity: 0.8; font-size: 14px; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        .input-section { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .btn-primary { background: #3498db; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        .btn-primary:hover { background: #2980b9; }
+
+        .tabs { display: flex; background: #34495e; border-radius: 8px 8px 0 0; overflow: hidden; }
+        .tabs button { flex: 1; padding: 15px 10px; border: none; background: #34495e; color: white; cursor: pointer; font-size: 16px; transition: background 0.3s; }
+        .tabs button:hover { background: #4a6741; }
+        .tabs button.active { background: #27ae60; }
+
+        .panel { display: none; background: white; border-radius: 0 0 8px 8px; min-height: 400px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .panel.active { display: block; }
+
+        .panel-content { padding: 20px; }
+
+        /* Progress Tab */
+        .progress-bar { background: #ecf0f1; height: 20px; border-radius: 10px; margin-bottom: 20px; overflow: hidden; }
+        .progress-fill { background: linear-gradient(90deg, #3498db, #2ecc71); height: 100%; transition: width 0.3s ease; }
+        .status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .status-card { background: #f8f9fa; padding: 15px; border-radius: 6px; border-left: 4px solid #3498db; }
+        .status-card h4 { margin-bottom: 8px; color: #2c3e50; }
+        .log-container { background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 6px; height: 300px; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 12px; }
+
+        /* Communications Tab */
+        .communication-log { height: 500px; overflow-y: auto; border: 1px solid #ddd; border-radius: 6px; }
+        .comm-message { padding: 10px; border-bottom: 1px solid #eee; }
+        .comm-message.INFO { border-left: 4px solid #3498db; }
+        .comm-message.WARNING { border-left: 4px solid #f39c12; background: #fef5e7; }
+        .comm-message.ERROR { border-left: 4px solid #e74c3c; background: #fdf2f2; }
+        .comm-message.CRITICAL { border-left: 4px solid #8e44ad; background: #f4f0f7; }
+        .comm-agent { font-weight: bold; color: #2c3e50; }
+        .comm-timestamp { font-size: 11px; color: #7f8c8d; float: right; }
+        .comm-data { background: #f8f9fa; padding: 8px; margin-top: 5px; border-radius: 4px; font-size: 11px; font-family: monospace; }
+
+        /* Screenshots Tab */
+        .screenshot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
+        .screenshot-item { background: white; padding: 10px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .screenshot-item img { width: 100%; height: auto; border-radius: 4px; cursor: pointer; }
+        .screenshot-item .caption { text-align: center; margin-top: 8px; color: #7f8c8d; font-size: 12px; }
+
+        /* Results Tab */
+        .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .result-section { background: white; padding: 15px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .result-section h3 { margin-bottom: 10px; color: #2c3e50; }
+        .result-list { list-style: none; }
+        .result-list li { padding: 5px 0; border-bottom: 1px solid #eee; }
+        .result-list li:last-child { border-bottom: none; }
+        .validation-score { background: #e8f5e8; padding: 10px; border-radius: 6px; text-align: center; }
+        .validation-score.low { background: #ffeaa7; }
+        .validation-score.failed { background: #fab1a0; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .tabs { flex-direction: column; }
+            .status-grid, .results-grid, .screenshot-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Animation */
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        .loading { animation: pulse 1.5s infinite; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🕷️ Universal Web Scraper</h1>
+        <div class="subtitle">Enhanced Multi-Agent System with Real-time Communication</div>
+    </div>
+
+    <div class="container">
+        <!-- Input Section -->
+        <div class="input-section">
+            <div class="form-group">
+                <label for="url">🌐 Target URL</label>
+                <input type="url" id="url" value="https://www.flipkart.com/search?q=samsung+mobile" placeholder="Enter the URL to scrape">
+            </div>
+
+            <div class="form-group">
+                <label for="objective">🎯 Objective</label>
+                <input type="text" id="objective" value="Find the top 5 latest Samsung smartphones under 50000 with user ratings above 4 stars" placeholder="Describe what you want to extract">
+            </div>
+
+            <div class="form-group">
+                <label for="provider">🤖 AI Provider</label>
+                <select id="provider">
+                    <option value="anthropic">Anthropic Claude (Recommended)</option>
+                    <option value="openai">OpenAI GPT-4</option>
+                    <option value="groq">Groq (Fastest)</option>
+                </select>
+            </div>
+
+            <button class="btn-primary" onclick="startScraping()">🚀 Start Scraping</button>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="tabs">
+            <button id="tabProgress" class="active" onclick="showTab('progress')">📊 Progress</button>
+            <button id="tabComm" onclick="showTab('communications')">💬 Agent Chat</button>
+            <button id="tabShots" onclick="showTab('screenshots')">📸 Screenshots</button>
+            <button id="tabResults" onclick="showTab('results')">🎯 Results</button>
+        </div>
+
+        <!-- Progress Tab -->
+        <div id="progress" class="panel active">
+            <div class="panel-content">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+                </div>
+
+                <div class="status-grid">
+                    <div class="status-card">
+                        <h4>Job ID</h4>
+                        <div id="jobId">-</div>
+                    </div>
+                    <div class="status-card">
+                        <h4>Status</h4>
+                        <div id="jobStatus">Ready</div>
+                    </div>
+                    <div class="status-card">
+                        <h4>Current Step</h4>
+                        <div id="currentStep">-</div>
+                    </div>
+                    <div class="status-card">
+                        <h4>Duration</h4>
+                        <div id="duration">0s</div>
+                    </div>
+                </div>
+
+                <h3>📜 Activity Log</h3>
+                <div class="log-container" id="activityLog">
+                    <div>Ready to start scraping...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Communications Tab -->
+        <div id="communications" class="panel">
+            <div class="panel-content">
+                <h3>🤖 Agent Communications</h3>
+                <div class="communication-log" id="commLog">
+                    <div class="comm-message INFO">
+                        <span class="comm-timestamp">Ready</span>
+                        <div class="comm-agent">SYSTEM</div>
+                        <div>Waiting for agents to start communicating...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screenshots Tab -->
+        <div id="screenshots" class="panel">
+            <div class="panel-content">
+                <h3>📸 Process Screenshots</h3>
+                <div class="screenshot-grid" id="screenshotGrid">
+                    <div style="text-align: center; color: #7f8c8d; padding: 40px;">
+                        No screenshots available yet. Start a scraping job to see visual progress.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Tab -->
+        <div id="results" class="panel">
+            <div class="panel-content">
+                <div class="validation-score" id="validationScore">
+                    <h3>Validation Score: 0.00</h3>
+                    <div>No results yet</div>
+                </div>
+
+                <div class="results-grid">
+                    <div class="result-section">
+                        <h3>📱 Products Found</h3>
+                        <ul class="result-list" id="productsList">
+                            <li>No products found yet...</li>
+                        </ul>
+                    </div>
+
+                    <div class="result-section">
+                        <h3>💰 Prices Found</h3>
+                        <ul class="result-list" id="pricesList">
+                            <li>No prices found yet...</li>
+                        </ul>
+                    </div>
+
+                    <div class="result-section">
+                        <h3>⭐ Ratings Found</h3>
+                        <ul class="result-list" id="ratingsList">
+                            <li>No ratings found yet...</li>
+                        </ul>
+                    </div>
+
+                    <div class="result-section">
+                        <h3>📊 Extraction Summary</h3>
+                        <ul class="result-list" id="summaryList">
+                            <li><strong>Method:</strong> <span id="extractionMethod">-</span></li>
+                            <li><strong>Total Items:</strong> <span id="totalItems">0</span></li>
+                            <li><strong>Execution Time:</strong> <span id="executionTime">0s</span></li>
+                            <li><strong>Steps Completed:</strong> <span id="stepsCompleted">0</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let eventSource = null;
+        let currentJobId = null;
+        let startTime = null;
+
+        // Tab Management
+        function showTab(tabName) {
+            // Hide all panels and remove active class from tabs
+            document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('active'));
+            document.querySelectorAll('.tabs button').forEach(tab => tab.classList.remove('active'));
+
+            // Show selected panel and activate tab
+            document.getElementById(tabName).classList.add('active');
+            document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.add('active');
+
+            // Load communications if switching to communications tab
+            if (tabName === 'communications' && currentJobId) {
+                loadCommunications();
+            }
+        }
+
+        // Utility Functions
+        function log(message, type = 'INFO') {
+            const logContainer = document.getElementById('activityLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function addCommunication(comm) {
+            const commLog = document.getElementById('commLog');
+            const commDiv = document.createElement('div');
+            commDiv.className = `comm-message ${comm.level || 'INFO'}`;
+
+            const timestamp = new Date(comm.timestamp || Date.now()).toLocaleTimeString();
+
+            let dataHtml = '';
+            if (comm.data && Object.keys(comm.data).length > 0) {
+                dataHtml = `<div class="comm-data">${JSON.stringify(comm.data, null, 2)}</div>`;
+            }
+
+            commDiv.innerHTML = `
+                <span class="comm-timestamp">${timestamp}</span>
+                <div class="comm-agent">${comm.agent}</div>
+                <div>${comm.message}</div>
+                ${dataHtml}
+            `;
+
+            commLog.appendChild(commDiv);
+            commLog.scrollTop = commLog.scrollHeight;
+        }
+
+        function updateProgress(progress) {
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function updateDuration() {
+            if (startTime) {
+                const duration = Math.floor((Date.now() - startTime) / 1000);
+                document.getElementById('duration').textContent = duration + 's';
+            }
+        }
+
+        // Start Scraping
+        async function startScraping() {
+            const url = document.getElementById('url').value;
+            const objective = document.getElementById('objective').value;
+            const provider = document.getElementById('provider').value;
+
+            if (!url || !objective) {
+                alert('Please enter both URL and objective');
+                return;
+            }
+
+            // Reset UI
+            document.getElementById('activityLog').innerHTML = '';
+            document.getElementById('commLog').innerHTML = '';
+            document.getElementById('screenshotGrid').innerHTML = '<div style="text-align: center; color: #7f8c8d; padding: 40px;">Loading screenshots...</div>';
+            updateProgress(0);
+
+            startTime = Date.now();
+            const durationInterval = setInterval(updateDuration, 1000);
+
+            try {
+                const response = await fetch('/scrape', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        url: url,
+                        objective: objective,
+                        config: { provider: provider }
+                    })
+                });
+
+                const data = await response.json();
+                currentJobId = data.job_id;
+
+                document.getElementById('jobId').textContent = currentJobId;
+                document.getElementById('jobStatus').textContent = 'Started';
+
+                log(`Job ${currentJobId} started successfully`);
+
+                // Start event stream
+                startEventStream(currentJobId, durationInterval);
+
+            } catch (error) {
+                log(`Error starting job: ${error.message}`, 'ERROR');
+                clearInterval(durationInterval);
+            }
+        }
+
+        // Event Stream Management
+        function startEventStream(jobId, durationInterval) {
+            if (eventSource) {
+                eventSource.close();
+            }
+
+            eventSource = new EventSource(`/stream/${jobId}`);
+
+            eventSource.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+
+                if (data.type === 'update') {
+                    handleUpdate(data.data);
+                } else if (data.type === 'communication') {
+                    addCommunication(data.data);
+                } else if (data.type === 'agent_activity') {
+                    handleAgentActivity(data.data);
+                } else if (data.type === 'complete') {
+                    handleComplete(data.result, durationInterval);
+                } else if (data.type === 'timeout') {
+                    log('Stream timeout - job may still be running');
+                    clearInterval(durationInterval);
+                }
+            };
+
+            eventSource.onerror = function(event) {
+                log('Stream connection error');
+                clearInterval(durationInterval);
+            };
+        }
+
+        function handleUpdate(update) {
+            log(`${update.message}`);
+
+            if (update.workflow_state) {
+                document.getElementById('currentStep').textContent = 
+                    update.workflow_state.replace(/_/g, ' ').toUpperCase();
+            }
+
+            // Update progress based on message
+            const progressMap = {
+                'job_started': 5,
+                'browser_initialized': 20,
+                'using_universal_scraper': 30,
+                'planning_started': 40,
+                'visual_analysis_started': 55,
+                'execution_started': 70,
+                'validation_started': 85,
+                'scraping_completed': 100,
+                'scraping_failed': 100
+            };
+
+            const progress = progressMap[update.message] || 
+                            (update.message.includes('completed') ? 90 : 50);
+            updateProgress(progress);
+        }
+
+        function handleAgentActivity(activity) {
+            log(`[${activity.agent_type.toUpperCase()}] ${activity.action} - ${activity.success ? 'SUCCESS' : 'FAILED'}`);
+        }
+
+        function handleComplete(result, durationInterval) {
+            clearInterval(durationInterval);
+            eventSource.close();
+
+            const success = result.success;
+            document.getElementById('jobStatus').textContent = success ? 'Completed' : 'Failed';
+
+            log(`Job completed - ${success ? 'SUCCESS' : 'FAILED'}`);
+
+            if (success) {
+                updateProgress(100);
+                displayResults(result);
+            } else {
+                updateProgress(100);
+                log('Job failed - check communications tab for details', 'ERROR');
+            }
+
+            // Load screenshots
+            displayScreenshots(result.screenshots || []);
+
+            // Load communications
+            loadCommunications();
+        }
+
+        function displayResults(result) {
+            const summary = result.final_summary || {};
+            const extracted = result.extracted_data || {};
+
+            // Update validation score
+            const score = summary.validation_score || 0;
+            const scoreElement = document.getElementById('validationScore');
+            scoreElement.innerHTML = `
+                <h3>Validation Score: ${score.toFixed(2)}</h3>
+                <div>${score >= 0.3 ? '✅ Meets Objective' : '❌ Below Threshold'}</div>
+            `;
+
+            if (score >= 0.6) {
+                scoreElement.className = 'validation-score';
+            } else if (score >= 0.3) {
+                scoreElement.className = 'validation-score low';
+            } else {
+                scoreElement.className = 'validation-score failed';
+            }
+
+            // Update products
+            const productsList = document.getElementById('productsList');
+            const products = summary.phones || [];
+            if (products.length > 0) {
+                productsList.innerHTML = products.map(product => 
+                    `<li>${product}</li>`
+                ).join('');
+            } else {
+                productsList.innerHTML = '<li>No products found</li>';
+            }
+
+            // Update prices
+            const pricesList = document.getElementById('pricesList');
+            const prices = summary.prices || [];
+            if (prices.length > 0) {
+                pricesList.innerHTML = prices.map(price => 
+                    `<li>${price}</li>`
+                ).join('');
+            } else {
+                pricesList.innerHTML = '<li>No prices found</li>';
+            }
+
+            // Update ratings
+            const ratingsList = document.getElementById('ratingsList');
+            const ratings = summary.ratings || [];
+            if (ratings.length > 0) {
+                ratingsList.innerHTML = ratings.map(rating => 
+                    `<li>${rating}</li>`
+                ).join('');
+            } else {
+                ratingsList.innerHTML = '<li>No ratings found</li>';
+            }
+
+            // Update summary
+            document.getElementById('extractionMethod').textContent = summary.extraction_method || 'Unknown';
+            document.getElementById('totalItems').textContent = summary.total_items_found || 0;
+            document.getElementById('executionTime').textContent = (result.execution_time || 0).toFixed(2) + 's';
+            document.getElementById('stepsCompleted').textContent = result.steps_completed || 0;
+        }
+
+        function displayScreenshots(screenshots) {
+            const grid = document.getElementById('screenshotGrid');
+
+            if (screenshots.length === 0) {
+                grid.innerHTML = '<div style="text-align: center; color: #7f8c8d; padding: 40px;">No screenshots captured</div>';
+                return;
+            }
+
+            grid.innerHTML = screenshots.map((screenshot, index) => `
+                <div class="screenshot-item">
+                    <img src="data:image/png;base64,${screenshot}" alt="Screenshot ${index + 1}" onclick="openScreenshot(this)">
+                    <div class="caption">Screenshot ${index + 1}</div>
+                </div>
+            `).join('');
+        }
+
+        async function loadCommunications() {
+            if (!currentJobId) return;
+
+            try {
+                const response = await fetch(`/communications/${currentJobId}`);
+                const data = await response.json();
+
+                const commLog = document.getElementById('commLog');
+                commLog.innerHTML = '';
+
+                if (data.communications.length === 0) {
+                    commLog.innerHTML = '<div class="comm-message INFO"><div>No communications yet</div></div>';
+                } else {
+                    data.communications.forEach(addCommunication);
+                }
+            } catch (error) {
+                console.error('Error loading communications:', error);
+            }
+        }
+
+        function openScreenshot(img) {
+            const newWindow = window.open();
+            newWindow.document.write(`
+                <html>
+                    <head><title>Screenshot</title></head>
+                    <body style="margin:0;background:#000;display:flex;justify-content:center;align-items:center;min-height:100vh;">
+                        <img src="${img.src}" style="max-width:100%;max-height:100%;object-fit:contain;">
+                    </body>
+                </html>
+            `);
+        }
+
+        // Update duration every second when job is running
+        setInterval(updateDuration, 1000);
+    </script>
+</body>
+</html>
